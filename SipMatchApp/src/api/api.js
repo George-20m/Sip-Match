@@ -33,19 +33,29 @@ export const loginUser = async (email, password) => {
 // FIXED: Removed duplicate /auth from URL
 export const forgotPassword = async (email) => {
   try {
+    console.log('🔵 Sending forgot password request to:', `${API_URL}/forgot-password`);
+    console.log('📧 Email:', email);
+    
     const response = await fetch(`${API_URL}/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
     
+    console.log('📡 Response status:', response.status);
+    
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Response error:', errorData);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('✅ Success response:', data);
+    return data;
   } catch (error) {
-    console.error('Forgot password API error:', error);
+    console.error('❌ Forgot password API error:', error);
+    console.error('Error details:', error.message);
     throw error;
   }
 };

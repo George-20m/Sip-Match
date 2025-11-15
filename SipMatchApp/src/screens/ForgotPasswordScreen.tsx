@@ -42,18 +42,12 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
 
       console.log('Forgot password response:', data);
 
-      if (data && (data.message || data.resetCode)) {
-        if (data.resetCode) {
-          Alert.alert(
-            'Code Sent!',
-            `Your reset code is: ${data.resetCode}\n\n(This is for testing only)`,
-            [{ text: 'OK', onPress: () => setStep('code') }]
-          );
-        } else {
-          Alert.alert('Success', 'Reset code sent to your email!', [
-            { text: 'OK', onPress: () => setStep('code') },
-          ]);
-        }
+      if (data && data.message) {
+        Alert.alert(
+          'Check Your Email! 📧',
+          'If an account exists with this email, you will receive a 6-digit reset code shortly.',
+          [{ text: 'OK', onPress: () => setStep('code') }]
+        );
       } else {
         Alert.alert('Error', 'Failed to send reset code. Please try again.');
       }
@@ -61,7 +55,7 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
       console.error('Forgot password error:', error);
       Alert.alert(
         'Error',
-        'Network error. Please check your connection and backend server.'
+        'Network error. Please check your connection and try again.'
       );
     } finally {
       setLoading(false);
@@ -100,14 +94,14 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
 
       if (data && data.message && data.message.toLowerCase().includes('success')) {
         Alert.alert(
-          'Success!',
+          'Success! ✅',
           'Password reset successful! You can now login with your new password.',
-          [{ text: 'OK', onPress: onBack }]
+          [{ text: 'Login Now', onPress: onBack }]
         );
       } else {
         Alert.alert(
           'Error',
-          data?.message || 'Failed to reset password. Please try again.'
+          data?.message || 'Invalid or expired code. Please try again.'
         );
       }
     } catch (error) {
@@ -144,7 +138,7 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
             <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>
               {step === 'email' && 'Enter your email to receive a reset code'}
-              {step === 'code' && 'Enter the 6-digit code sent to your email'}
+              {step === 'code' && 'Check your email for the 6-digit code'}
               {step === 'newPassword' && 'Create your new password'}
             </Text>
           </View>
@@ -176,6 +170,13 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
                     {loading ? 'Sending...' : 'Send Reset Code'}
                   </Text>
                 </TouchableOpacity>
+
+                <View style={styles.infoBox}>
+                  <Icon name="info" size={16} color="#8D6E63" />
+                  <Text style={styles.infoText}>
+                    You'll receive an email with a 6-digit code that expires in 10 minutes.
+                  </Text>
+                </View>
               </>
             )}
 
@@ -217,6 +218,13 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
                     {loading ? 'Sending...' : 'Resend Code'}
                   </Text>
                 </TouchableOpacity>
+
+                <View style={styles.infoBox}>
+                  <Icon name="clock" size={16} color="#8D6E63" />
+                  <Text style={styles.infoText}>
+                    Code expires in 10 minutes. Check your spam folder if you don't see it.
+                  </Text>
+                </View>
               </>
             )}
 
@@ -407,5 +415,20 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     opacity: 0.5,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF8E7',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 20,
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  infoText: {
+    flex: 1,
+    color: '#8D6E63',
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

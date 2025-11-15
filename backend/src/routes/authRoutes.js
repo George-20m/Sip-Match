@@ -1,17 +1,16 @@
-// backend\src\routes\authRoutes.js
+// backend/src/routes/authRoutes.js
 import express from "express";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
-import crypto from 'crypto';
+import { sendPasswordResetEmail } from "../config/emailConfig.js";
 
 const router = express.Router();
+
 const generateToken = (userId) => {
-  // Implement token generation logic (e.g., JWT)
   return jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: "15d"});
 };
 
 router.post("/register", async (req, res) => {
-  // Handle user registration
   try {
     const {username, email, password} = req.body;
 
@@ -26,8 +25,6 @@ router.post("/register", async (req, res) => {
     if(username.length < 3){
       return res.status(400).json({message: "Username must be at least 3 characters long"});
     }
-
-    // check if user already exists in the database
 
     const existingEmail = await User.findOne({ email });
     if(existingEmail){
@@ -60,7 +57,6 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  // Handle user login
   try {
     const {email, password} = req.body;
 
@@ -68,19 +64,16 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({message: "All fields are required"});
     }
 
-    // check if user exists
     const user = await User.findOne({ email });
     if(!user){
       return res.status(400).json({message: "Invalid email or password"});
     }
 
-    // check if password is correct
     const isMatch = await user.matchPassword(password);
     if(!isMatch){
       return res.status(400).json({message: "Invalid email or password"});
     }
 
-    // generate token
     const token = generateToken(user._id);
 
     res.status(200).json({
@@ -97,23 +90,32 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// In authRoutes.js - Update the forgot-password route
 router.post("/forgot-password", async (req, res) => {
+  console.log('🔵 Forgot password request received');
+  console.log('📦 Request body:', req.body);
+  
   try {
     const { email } = req.body;
     
     if (!email) {
+      console.log('❌ No email provided');
       return res.status(400).json({ message: "Email is required" });
     }
 
+    console.log('🔍 Looking for user with email:', email);
+    
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     
     if (!user) {
-      // Don't reveal if user exists for security
+      console.log('⚠️ User not found, but sending success response for security');
       return res.status(200).json({ 
         message: "If that email exists, a reset code has been sent." 
       });
     }
+
+    console.log('✅ User found:', user.username);
 
     // Generate 6-digit code
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -124,18 +126,31 @@ router.post("/forgot-password", async (req, res) => {
     user.resetPasswordExpiry = resetCodeExpiry;
     await user.save();
 
-    // Log code (in production, send via email)
-    console.log(`📧 Password reset code for ${email}: ${resetCode}`);
-    console.log(`⏰ Code expires in 10 minutes`);
+    console.log('💾 Reset code saved to database');
 
-    res.status(200).json({ 
-      message: "If that email exists, a reset code has been sent.",
-      // ⚠️ REMOVE THIS IN PRODUCTION! Only for testing:
-      resetCode: resetCode 
-    });
+    // Send email with reset code
+    try {
+      console.log('📧 Attempting to send email...');
+      await sendPasswordResetEmail(user.email, resetCode, user.username);
+      console.log(`✅ Password reset email sent to: ${user.email}`);
+      
+      res.status(200).json({ 
+        message: "Password reset code has been sent to your email."
+      });
+    } catch (emailError) {
+      console.error('❌ Failed to send email:', emailError);
+      // Clear the reset code if email fails
+      user.resetPasswordCode = undefined;
+      user.resetPasswordExpiry = undefined;
+      await user.save();
+      
+      return res.status(500).json({ 
+        message: "Failed to send reset email. Please try again." 
+      });
+    }
 
   } catch (error) {
-    console.error("Error in forgot password:", error);
+    console.error("❌ Error in forgot password:", error);
     res.status(500).json({ message: "Server error during password reset" });
   }
 });
@@ -145,7 +160,6 @@ router.post("/reset-password", async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
 
-    // Validation
     if (!email || !code || !newPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -178,7 +192,7 @@ router.post("/reset-password", async (req, res) => {
     console.log(`✅ Password reset successful for: ${email}`);
 
     res.status(200).json({ 
-      message: "Password reset successful" 
+      message: "Password reset successful. You can now login with your new password." 
     });
 
   } catch (error) {

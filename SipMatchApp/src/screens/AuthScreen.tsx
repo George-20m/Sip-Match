@@ -1,12 +1,16 @@
+// AuthScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { registerUser, loginUser } from '../api/api';
-import { Alert } from 'react-native';
 
-export default function AuthScreen() {
+interface AuthScreenProps {
+  onAuthSuccess: (user: any) => void; // Pass user data to parent
+}
+
+export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,6 +18,58 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleAuth = async () => {
+    if (activeTab === 'login') {
+      // Login
+      if (!email || !password) {
+        return Alert.alert('Error', 'Please fill all fields');
+      }
+
+      const res = await loginUser(email, password);
+      if (res.token) {
+        Alert.alert('Success', `Welcome back, ${res.user.username || 'User'}!`, [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('JWT Token:', res.token);
+              console.log('User Data:', res.user);
+              // Pass the user data to App.js
+              onAuthSuccess(res.user);
+            }
+          }
+        ]);
+      } else {
+        Alert.alert('Login Failed', res.message || 'Something went wrong');
+      }
+    } else {
+      // Sign Up
+      if (!name || !email || !password || !confirmPassword) {
+        return Alert.alert('Error', 'Please fill all fields');
+      }
+
+      if (password !== confirmPassword) {
+        return Alert.alert('Error', 'Passwords do not match');
+      }
+
+      const res = await registerUser(name, email, password);
+      if (res.token) {
+        Alert.alert('Success', `Welcome ${res.user.username || 'User'}!`, [
+          {
+            text: 'OK',
+            onPress: () => {
+              console.log('JWT Token:', res.token);
+              console.log('User Data:', res.user);
+              // Pass the user data to App.js
+              onAuthSuccess(res.user);
+            }
+          }
+        ]);
+      } else {
+        Alert.alert('Signup Failed', res.message || 'Something went wrong');
+      }
+    }
+  };
 
   return (
     <LinearGradient colors={['#FFF8E7', '#F5E6D3']} style={styles.container}>
@@ -66,6 +122,7 @@ export default function AuthScreen() {
             onChangeText={setEmail}
             style={styles.input}
             keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
@@ -119,42 +176,7 @@ export default function AuthScreen() {
         )}
 
         {/* Main Button */}
-        {/* <TouchableOpacity style={styles.mainButton}>
-          <Text style={styles.mainButtonText}>
-            {activeTab === 'login' ? 'Login' : 'Create Account'}
-          </Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity
-          style={styles.mainButton}
-          onPress={async () => {
-            if (activeTab === 'login') {
-              if (!email || !password)
-                return Alert.alert('Error', 'Please fill all fields');
-
-              const res = await loginUser(email, password);
-              if (res.token) {
-                Alert.alert('Success', `Welcome back, ${res.user.name || 'User'}!`);
-                console.log('JWT Token:', res.token);
-              } else {
-                Alert.alert('Login Failed', res.message || 'Something went wrong');
-              }
-            } else {
-              if (!name || !email || !password || !confirmPassword)
-                return Alert.alert('Error', 'Please fill all fields');
-
-              if (password !== confirmPassword)
-                return Alert.alert('Error', 'Passwords do not match');
-
-              const res = await registerUser(name, email, password);
-              if (res.token) {
-                Alert.alert('Success', `Welcome ${res.user.name || 'User'}!`);
-                console.log('JWT Token:', res.token);
-              } else {
-                Alert.alert('Signup Failed', res.message || 'Something went wrong');
-              }
-            }
-          }}
-        >
+        <TouchableOpacity style={styles.mainButton} onPress={handleAuth}>
           <Text style={styles.mainButtonText}>
             {activeTab === 'login' ? 'Login' : 'Create Account'}
           </Text>

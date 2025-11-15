@@ -5,7 +5,9 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
-    // ADD THESE TWO LINES:
+    isEmailVerified: { type: Boolean, default: false }, // NEW: Email verification status
+    emailVerificationCode: String, // NEW: OTP for email verification
+    emailVerificationExpiry: Date, // NEW: OTP expiry time
     resetPasswordCode: String,
     resetPasswordExpiry: Date,
 }, { timestamps: true });
@@ -26,7 +28,6 @@ userSchema.pre("save", async function(next) {
 userSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 }
-
 
 const User = mongoose.model("User", userSchema);
 

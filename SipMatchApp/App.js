@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AuthScreen from './src/screens/AuthScreen';
+import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import HomeScreen from './src/screens/HomeScreen';
 
@@ -11,6 +12,8 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationData, setVerificationData] = useState(null);
   const [currentScreen, setCurrentScreen] = useState('home');
   const [userData, setUserData] = useState(null);
 
@@ -18,17 +21,27 @@ export default function App() {
   const handleAuthSuccess = (user) => {
     setUserData(user);
     setIsAuthenticated(true);
-    setShowForgotPassword(false); // Reset in case they came from forgot password
+    setShowForgotPassword(false);
+    setShowVerification(false);
   };
 
   // Handle forgot password navigation
   const handleForgotPassword = () => {
     setShowForgotPassword(true);
+    setShowVerification(false);
   };
 
-  // Handle back from forgot password
+  // Handle show verification screen
+  const handleShowVerification = (data) => {
+    setVerificationData(data);
+    setShowVerification(true);
+    setShowForgotPassword(false);
+  };
+
+  // Handle back to auth
   const handleBackToAuth = () => {
     setShowForgotPassword(false);
+    setShowVerification(false);
   };
 
   // Handle navigation from HomeScreen
@@ -51,16 +64,30 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
-    // Show Forgot Password Screen if user clicked "Forgot Password"
+    // Show Email Verification Screen
+    if (showVerification && verificationData) {
+      return (
+        <EmailVerificationScreen
+          email={verificationData.email}
+          username={verificationData.username}
+          password={verificationData.password}
+          onVerificationSuccess={handleAuthSuccess}
+          onBack={handleBackToAuth}
+        />
+      );
+    }
+
+    // Show Forgot Password Screen
     if (showForgotPassword) {
       return <ForgotPasswordScreen onBack={handleBackToAuth} />;
     }
     
-    // Show Auth Screen with forgot password handler
+    // Show Auth Screen
     return (
       <AuthScreen 
         onAuthSuccess={handleAuthSuccess}
         onForgotPassword={handleForgotPassword}
+        onShowVerification={handleShowVerification}
       />
     );
   }

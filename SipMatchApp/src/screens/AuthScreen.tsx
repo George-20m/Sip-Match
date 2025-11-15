@@ -4,14 +4,15 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { registerUser, loginUser } from '../api/api';
+import { loginUser, sendVerificationCode } from '../api/api';
 
 interface AuthScreenProps {
   onAuthSuccess: (user: any) => void;
-  onForgotPassword?: () => void; // Make it optional with default
+  onForgotPassword?: () => void;
+  onShowVerification?: (data: {email: string, username: string, password: string}) => void;
 }
 
-export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScreenProps) {
+export default function AuthScreen({ onAuthSuccess, onForgotPassword, onShowVerification }: AuthScreenProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleAuth = async () => {
     if (activeTab === 'login') {
@@ -27,27 +29,34 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
         return Alert.alert('Error', 'Please fill all fields');
       }
 
-      // Convert email to lowercase
-      const normalizedEmail = email.trim().toLowerCase();
+      setLoading(true);
+      try {
+        // Convert email to lowercase
+        const normalizedEmail = email.trim().toLowerCase();
 
-      const res = await loginUser(normalizedEmail, password);
-      if (res.token) {
-        Alert.alert('Success', `Welcome back, ${res.user.username || 'User'}!`, [
-          {
-            text: 'OK',
-            onPress: () => {
-              console.log('JWT Token:', res.token);
-              console.log('User Data:', res.user);
-              // Pass the user data to App.js
-              onAuthSuccess(res.user);
+        const res = await loginUser(normalizedEmail, password);
+        if (res.token) {
+          Alert.alert('Success', `Welcome back, ${res.user.username || 'User'}!`, [
+            {
+              text: 'OK',
+              onPress: () => {
+                console.log('JWT Token:', res.token);
+                console.log('User Data:', res.user);
+                onAuthSuccess(res.user);
+              }
             }
-          }
-        ]);
-      } else {
-        Alert.alert('Login Failed', res.message || 'Something went wrong');
+          ]);
+        } else {
+          Alert.alert('Login Failed', res.message || 'Something went wrong');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        Alert.alert('Error', 'Network error. Please try again.');
+      } finally {
+        setLoading(false);
       }
     } else {
-      // Sign Up
+      // Sign Up - Send verification code
       if (!name || !email || !password || !confirmPassword) {
         return Alert.alert('Error', 'Please fill all fields');
       }
@@ -56,34 +65,48 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
         return Alert.alert('Error', 'Passwords do not match');
       }
 
-      // Normalize username: trim, capitalize first letter, lowercase rest
-      const trimmedName = name.trim();
-      const normalizedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1).toLowerCase();
-      
-      // Convert email to lowercase
-      const normalizedEmail = email.trim().toLowerCase();
+      setLoading(true);
+      try {
+        // Normalize username: trim, capitalize first letter, lowercase rest
+        const trimmedName = name.trim();
+        const normalizedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1).toLowerCase();
+        
+        // Convert email to lowercase
+        const normalizedEmail = email.trim().toLowerCase();
 
-      const res = await registerUser(normalizedName, normalizedEmail, password);
-      if (res.token) {
-        Alert.alert('Success', `Welcome ${res.user.username || 'User'}!`, [
-          {
-            text: 'OK',
-            onPress: () => {
-              console.log('JWT Token:', res.token);
-              console.log('User Data:', res.user);
-              // Pass the user data to App.js
-              onAuthSuccess(res.user);
-            }
-          }
-        ]);
-      } else {
-        Alert.alert('Signup Failed', res.message || 'Something went wrong');
+        const res = await sendVerificationCode(normalizedName, normalizedEmail, password);
+        
+        if (res && res.message) {
+          Alert.alert(
+            'Check Your Email! 📧',
+            'We\'ve sent a verification code to your email. Please enter it to complete registration.',
+            [{
+              text: 'OK',
+              onPress: () => {
+                if (onShowVerification) {
+                  onShowVerification({
+                    email: normalizedEmail,
+                    username: normalizedName,
+                    password: password
+                  });
+                }
+              }
+            }]
+          );
+        } else {
+          Alert.alert('Signup Failed', res.message || 'Something went wrong');
+        }
+      } catch (error) {
+        console.error('Signup error:', error);
+        Alert.alert('Error', 'Network error. Please try again.');
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   const handleForgotPassword = () => {
-    console.log('Forgot password clicked'); // Debug log
+    console.log('Forgot password clicked');
     if (onForgotPassword) {
       onForgotPassword();
     } else {
@@ -107,12 +130,14 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
         <TouchableOpacity
           style={[styles.tab, activeTab === 'login' && styles.activeTab]}
           onPress={() => setActiveTab('login')}
+          disabled={loading}
         >
           <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'signup' && styles.activeTab]}
           onPress={() => setActiveTab('signup')}
+          disabled={loading}
         >
           <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
         </TouchableOpacity>
@@ -129,6 +154,7 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
               value={name}
               onChangeText={setName}
               style={styles.input}
+              editable={!loading}
             />
           </View>
         )}
@@ -143,6 +169,7 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!loading}
           />
         </View>
 
@@ -155,6 +182,7 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
             style={styles.input}
+            editable={!loading}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Icon
@@ -176,6 +204,7 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
               style={styles.input}
+              editable={!loading}
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
               <Icon
@@ -193,15 +222,24 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
           <TouchableOpacity 
             onPress={handleForgotPassword}
             activeOpacity={0.7}
+            disabled={loading}
           >
             <Text style={styles.forgot}>Forgot password?</Text>
           </TouchableOpacity>
         )}
 
         {/* Main Button */}
-        <TouchableOpacity style={styles.mainButton} onPress={handleAuth}>
+        <TouchableOpacity 
+          style={[styles.mainButton, loading && styles.disabledButton]} 
+          onPress={handleAuth}
+          disabled={loading}
+          activeOpacity={0.7}
+        >
           <Text style={styles.mainButtonText}>
-            {activeTab === 'login' ? 'Login' : 'Create Account'}
+            {loading 
+              ? (activeTab === 'login' ? 'Logging in...' : 'Sending Code...') 
+              : (activeTab === 'login' ? 'Login' : 'Create Account')
+            }
           </Text>
         </TouchableOpacity>
       </View>
@@ -214,12 +252,12 @@ export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScre
       </View>
 
       {/* Social Buttons */}
-      <TouchableOpacity style={styles.socialButton}>
+      <TouchableOpacity style={styles.socialButton} disabled={loading}>
         <MaterialCommunityIcons name="google" size={20} color="#3E2723" style={{ marginRight: 10 }} />
         <Text style={styles.socialText}>Continue with Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.socialButton}>
+      <TouchableOpacity style={styles.socialButton} disabled={loading}>
         <MaterialCommunityIcons name="spotify" size={20} color="#3E2723" style={{ marginRight: 10 }} />
         <Text style={styles.socialText}>Connect with Spotify</Text>
       </TouchableOpacity>
@@ -315,6 +353,9 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 12,
     alignItems: 'center',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   mainButtonText: {
     color: '#fff',

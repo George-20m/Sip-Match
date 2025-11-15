@@ -26,7 +26,10 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         return Alert.alert('Error', 'Please fill all fields');
       }
 
-      const res = await loginUser(email, password);
+      // Convert email to lowercase
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const res = await loginUser(normalizedEmail, password);
       if (res.token) {
         Alert.alert('Success', `Welcome back, ${res.user.username || 'User'}!`, [
           {
@@ -52,7 +55,14 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         return Alert.alert('Error', 'Passwords do not match');
       }
 
-      const res = await registerUser(name, email, password);
+      // Normalize username: trim, capitalize first letter, lowercase rest
+      const trimmedName = name.trim();
+      const normalizedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1).toLowerCase();
+      
+      // Convert email to lowercase
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const res = await registerUser(normalizedName, normalizedEmail, password);
       if (res.token) {
         Alert.alert('Success', `Welcome ${res.user.username || 'User'}!`, [
           {

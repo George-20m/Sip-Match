@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { verifyEmail, sendVerificationCode } from '../api/api';
+import OTPInput from '../components/OTPInput';
 
 interface EmailVerificationScreenProps {
   email: string;
@@ -116,17 +117,11 @@ export default function EmailVerificationScreen({
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Icon name="key" size={20} color="#8D6E63" style={styles.icon} />
-              <TextInput
-                placeholder="Enter 6-digit code"
-                value={code}
-                onChangeText={setCode}
-                style={styles.input}
-                keyboardType="number-pad"
-                maxLength={6}
+            <View style={styles.otpContainer}>
+              <OTPInput 
+                code={code}
+                onChangeCode={setCode}
                 editable={!loading}
-                autoFocus
               />
             </View>
 
@@ -217,30 +212,10 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginBottom: 16,
     paddingHorizontal: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  icon: {
-    marginRight: 6,
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    color: '#3E2723',
-    fontSize: 18,
-    letterSpacing: 4,
-    fontWeight: '600',
+  otpContainer: {
+    marginBottom: 10,
   },
   mainButton: {
     backgroundColor: '#8B4513',

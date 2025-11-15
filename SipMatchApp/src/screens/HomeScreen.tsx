@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.card,
     paddingHorizontal: 16,
-    paddingTop: 48,
+    paddingTop: 16 + StatusBar.currentHeight!,
     paddingBottom: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',

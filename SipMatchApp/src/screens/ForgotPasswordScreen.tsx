@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { forgotPassword, resetPassword } from '../api/api';
+import OTPInput from '../components/OTPInput';
 
 interface ForgotPasswordScreenProps {
   onBack: () => void;
@@ -187,17 +188,11 @@ export default function ForgotPasswordScreen({ onBack }: ForgotPasswordScreenPro
                   <Text style={styles.codeInfoText}>Code sent to: {email}</Text>
                 </View>
 
-                <View style={styles.inputContainer}>
-                  <Icon name="key" size={20} color="#8D6E63" style={styles.icon} />
-                  <TextInput
-                    placeholder="Enter 6-digit code"
-                    value={code}
-                    onChangeText={setCode}
-                    style={styles.input}
-                    keyboardType="number-pad"
-                    maxLength={6}
+                <View style={styles.otpContainer}>
+                  <OTPInput 
+                    code={code}
+                    onChangeCode={setCode}
                     editable={!loading}
-                    autoCorrect={false}
                   />
                 </View>
 
@@ -353,12 +348,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     gap: 8,
   },
   codeInfoText: {
     color: '#8D6E63',
     fontSize: 14,
+  },
+  otpContainer: {
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
   inputContainer: {
     flexDirection: 'row',

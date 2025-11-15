@@ -1,4 +1,4 @@
-// AuthScreen.tsx
+// SipMatchApp\src\screens\AuthScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,10 +7,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { registerUser, loginUser } from '../api/api';
 
 interface AuthScreenProps {
-  onAuthSuccess: (user: any) => void; // Pass user data to parent
+  onAuthSuccess: (user: any) => void;
+  onForgotPassword?: () => void; // Make it optional with default
 }
 
-export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
+export default function AuthScreen({ onAuthSuccess, onForgotPassword }: AuthScreenProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -78,6 +79,15 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
       } else {
         Alert.alert('Signup Failed', res.message || 'Something went wrong');
       }
+    }
+  };
+
+  const handleForgotPassword = () => {
+    console.log('Forgot password clicked'); // Debug log
+    if (onForgotPassword) {
+      onForgotPassword();
+    } else {
+      Alert.alert('Coming Soon', 'Password reset feature will be available soon!');
     }
   };
 
@@ -180,7 +190,10 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
 
         {/* Forgot Password (Login only) */}
         {activeTab === 'login' && (
-          <TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleForgotPassword}
+            activeOpacity={0.7}
+          >
             <Text style={styles.forgot}>Forgot password?</Text>
           </TouchableOpacity>
         )}
@@ -294,6 +307,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#8B4513',
     marginBottom: 10,
+    fontSize: 14,
+    fontWeight: '500',
   },
   mainButton: {
     backgroundColor: '#8B4513',

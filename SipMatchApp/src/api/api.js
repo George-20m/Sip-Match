@@ -1,4 +1,4 @@
-const API_URL = 'http://192.168.1.2:3000/api/auth'; 
+const API_URL = 'http://192.168.1.3:3000/api/auth';
 
 // Send verification code (Step 1 of signup)
 export const sendVerificationCode = async (username, email, password) => {

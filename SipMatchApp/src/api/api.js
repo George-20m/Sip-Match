@@ -1,3 +1,4 @@
+// api/api.js
 const API_URL = 'http://192.168.1.3:3000/api/auth';
 
 // Send verification code (Step 1 of signup)
@@ -66,6 +67,31 @@ export const loginUser = async (email, password) => {
   } catch (error) {
     console.error('Login error:', error);
     throw new Error('Network error');
+  }
+};
+
+// Update username
+export const updateUsername = async (userId, username) => {
+  try {
+    console.log('🔵 Updating username...', { userId, username });
+    const response = await fetch(`${API_URL}/update-username`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, username }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ Update username error:', data);
+      throw new Error(data.message || 'Failed to update username');
+    }
+    
+    console.log('✅ Username updated:', data);
+    return data;
+  } catch (error) {
+    console.error('Update username error:', error);
+    throw error;
   }
 };
 

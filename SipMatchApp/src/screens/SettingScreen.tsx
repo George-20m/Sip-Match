@@ -1,16 +1,19 @@
-// SipMatchApp/src/screens/SettingsScreen.js
+// SipMatchApp/src/screens/SettingsScreen.tsx
 import React, { useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   SafeAreaView,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { updateUsername } from "../api/api";
 
 // Color palette from globals.css
 const COLORS = {
@@ -33,20 +36,45 @@ const COLORS = {
   switchBackground: '#D4A574',
 };
 
-export function SettingsScreen({ onBack, onLogout, userData }) {
+interface SettingsScreenProps {
+  onBack: () => void;
+  onLogout: () => void;
+  userData: {
+    userId: string;
+    username: string;
+    email: string;
+  } | null;
+  onUpdateUserData?: (user: any) => void;
+}
+
+interface ToggleSwitchProps {
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+}
+
+export function SettingsScreen({ onBack, onLogout, userData, onUpdateUserData }: SettingsScreenProps) {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [spotifyConnected, setSpotifyConnected] = useState(false);
+  
+  // Name editing state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(userData?.username || "User");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Get user data from props or use defaults
   const userName = userData?.username || "User";
   const userEmail = userData?.email || "user@example.com";
+  const userId = userData?.userId;
   const userLocation = "Cairo, Egypt"; // Default location
   
   // Get first letter of username for avatar
-  const avatarLetter = userName.charAt(0).toUpperCase();
+  const avatarLetter = (isEditingName ? editedName : userName).charAt(0).toUpperCase();
 
-  const ToggleSwitch = ({ value, onValueChange }) => (
+  // Check if name has changed
+  const hasNameChanged = editedName.trim() !== userName && editedName.trim().length > 0;
+
+  const ToggleSwitch = ({ value, onValueChange }: ToggleSwitchProps) => (
     <TouchableOpacity
       onPress={() => onValueChange(!value)}
       style={[styles.switch, value && styles.switchActive]}
@@ -55,6 +83,62 @@ export function SettingsScreen({ onBack, onLogout, userData }) {
       <View style={[styles.switchThumb, value && styles.switchThumbActive]} />
     </TouchableOpacity>
   );
+
+  const handleEditName = () => {
+    setIsEditingName(true);
+    setEditedName(userName);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setEditedName(userName);
+  };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      Alert.alert("Error", "Name cannot be empty");
+      return;
+    }
+
+    if (editedName.trim().length < 3) {
+      Alert.alert("Error", "Name must be at least 3 characters long");
+      return;
+    }
+
+    if (!userId) {
+      Alert.alert("Error", "User ID not found. Please try logging in again.");
+      console.error("userId is missing:", userData);
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      // Call API using the imported function
+      const response = await updateUsername(userId, editedName.trim());
+
+      if (response && response.user) {
+        Alert.alert("Success", "Your name has been updated successfully!");
+        setIsEditingName(false);
+        
+        // Update the parent component's userData if callback exists
+        if (onUpdateUserData) {
+          onUpdateUserData(response.user);
+        } else if (userData) {
+          // Fallback: update the local userData object
+          userData.username = response.user.username;
+        }
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (error: any) {
+      console.error('Error updating name:', error);
+      Alert.alert("Error", error.message || "Failed to update name. Please try again.");
+      setEditedName(userName); // Reset to original name
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -90,14 +174,6 @@ export function SettingsScreen({ onBack, onLogout, userData }) {
     );
   };
 
-  const handleEditProfile = () => {
-    Alert.alert(
-      "Edit Profile",
-      "Profile editing feature is coming soon! You'll be able to update your information here.",
-      [{ text: "OK" }]
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.card} />
@@ -119,16 +195,18 @@ export function SettingsScreen({ onBack, onLogout, userData }) {
               <Text style={styles.avatarText}>{avatarLetter}</Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{userName}</Text>
-              <TouchableOpacity onPress={handleEditProfile}>
-                <Text style={styles.profileSubtext}>Edit Profile</Text>
-              </TouchableOpacity>
+              <Text style={styles.profileName}>{isEditingName ? editedName : userName}</Text>
             </View>
           </View>
 
-          {/* Read-only user information display */}
+          {/* User information display */}
           <View style={styles.infoSection}>
-            <View style={styles.infoItem}>
+            {/* Name Section - Editable */}
+            <View style={[
+              styles.infoItem, 
+              isEditingName && styles.editingItem,
+              isEditingName && styles.noBorder
+            ]}>
               <View style={styles.infoIconContainer}>
                 <Ionicons 
                   name="person-outline" 
@@ -137,11 +215,59 @@ export function SettingsScreen({ onBack, onLogout, userData }) {
                 />
               </View>
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Name</Text>
-                <Text style={styles.infoValue}>{userName}</Text>
+                <View style={styles.infoHeader}>
+                  <Text style={styles.infoLabel}>Name</Text>
+                  {!isEditingName && (
+                    <TouchableOpacity onPress={handleEditName}>
+                      <Text style={styles.editText}>Edit name</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                {isEditingName ? (
+                  <TextInput
+                    style={styles.editInput}
+                    value={editedName}
+                    onChangeText={setEditedName}
+                    placeholder="Enter your name"
+                    placeholderTextColor={COLORS.mutedForeground}
+                    autoFocus
+                  />
+                ) : (
+                  <Text style={styles.infoValue}>{userName}</Text>
+                )}
               </View>
             </View>
 
+            {/* Action buttons when editing */}
+            {isEditingName && (
+              <View style={styles.editActionsWrapper}>
+                <View style={styles.editActions}>
+                  <TouchableOpacity 
+                    style={styles.cancelButton} 
+                    onPress={handleCancelEdit}
+                    disabled={isSaving}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.saveButton,
+                      (!hasNameChanged || isSaving) && styles.saveButtonDisabled
+                    ]} 
+                    onPress={handleSaveName}
+                    disabled={!hasNameChanged || isSaving}
+                  >
+                    {isSaving ? (
+                      <ActivityIndicator size="small" color={COLORS.primaryForeground} />
+                    ) : (
+                      <Text style={styles.saveButtonText}>Save</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Email - Read only */}
             <View style={styles.infoItem}>
               <View style={styles.infoIconContainer}>
                 <Ionicons 
@@ -156,6 +282,7 @@ export function SettingsScreen({ onBack, onLogout, userData }) {
               </View>
             </View>
 
+            {/* Location - Read only */}
             <View style={[styles.infoItem, styles.noBorder]}>
               <View style={styles.infoIconContainer}>
                 <Ionicons 
@@ -341,12 +468,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     color: COLORS.foreground,
-    marginBottom: 4,
-  },
-  profileSubtext: {
-    fontSize: 14,
-    color: COLORS.accent,
-    fontWeight: "500",
   },
   infoSection: {
     borderTopWidth: 1,
@@ -355,10 +476,13 @@ const styles = StyleSheet.create({
   },
   infoItem: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+  },
+  editingItem: {
+    paddingBottom: 16,
   },
   noBorder: {
     borderBottomWidth: 0,
@@ -370,20 +494,84 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
   },
   infoTextContainer: {
     marginLeft: 12,
     flex: 1,
   },
+  infoHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   infoLabel: {
     fontSize: 12,
     color: COLORS.mutedForeground,
-    marginBottom: 2,
+  },
+  editText: {
+    fontSize: 14,
+    color: COLORS.accent,
+    fontWeight: "500",
   },
   infoValue: {
     fontSize: 16,
     color: COLORS.foreground,
     fontWeight: "500",
+  },
+  editInput: {
+    fontSize: 16,
+    color: COLORS.foreground,
+    fontWeight: "500",
+    backgroundColor: COLORS.inputBackground,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 4,
+  },
+  editActionsWrapper: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    paddingBottom: 12,
+    marginBottom: 12,
+  },
+  editActions: {
+    flexDirection: "row",
+    gap: 12,
+    paddingLeft: 52,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cancelButtonText: {
+    color: COLORS.foreground,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  saveButtonDisabled: {
+    backgroundColor: COLORS.mutedForeground,
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    color: COLORS.primaryForeground,
+    fontSize: 14,
+    fontWeight: "600",
   },
   cardTitle: {
     fontSize: 16,

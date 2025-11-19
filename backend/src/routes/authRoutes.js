@@ -218,6 +218,47 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Update Username
+router.put("/update-username", async (req, res) => {
+  try {
+    const { userId, username } = req.body;
+
+    // Validation
+    if (!userId || !username) {
+      return res.status(400).json({ message: "User ID and username are required" });
+    }
+
+    if (username.trim().length < 3) {
+      return res.status(400).json({ message: "Username must be at least 3 characters long" });
+    }
+
+    // Find user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update username
+    user.username = username.trim();
+    await user.save();
+
+    console.log(`✅ Username updated successfully for user: ${userId} - New username: ${username}`);
+
+    res.status(200).json({
+      message: "Username updated successfully",
+      user: {
+        userId: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).json({ message: "Server error while updating username" });
+  }
+});
+
 // Forgot Password
 router.post("/forgot-password", async (req, res) => {
   try {

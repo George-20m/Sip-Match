@@ -28,6 +28,12 @@ export default function App() {
     setCurrentScreen('home'); // Reset to home on login
   };
 
+  // Handle user data updates (like username changes)
+  const handleUpdateUserData = (updatedUser) => {
+    console.log('🔄 Updating user data:', updatedUser);
+    setUserData(updatedUser);
+  };
+
   // Handle forgot password navigation
   const handleForgotPassword = () => {
     setShowForgotPassword(true);
@@ -117,6 +123,7 @@ export default function App() {
           onBack={handleBackToHome}
           onLogout={handleLogout}
           userData={userData}
+          onUpdateUserData={handleUpdateUserData}
         />
       );
     

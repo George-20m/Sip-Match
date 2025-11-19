@@ -7,6 +7,9 @@ import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import { SettingsScreen } from './src/screens/SettingScreen';
+import RecommendationScreen from './src/screens/RecommendationScreen';
+import FavoritesScreen from './src/screens/FavoritesScreen';
+import HistoryScreen from './src/screens/HistoryScreen';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -17,6 +20,7 @@ export default function App() {
   const [verificationData, setVerificationData] = useState(null);
   const [currentScreen, setCurrentScreen] = useState('home');
   const [userData, setUserData] = useState(null);
+  const [selectedMood, setSelectedMood] = useState(null);
 
   // Handle successful authentication
   const handleAuthSuccess = (user) => {
@@ -59,9 +63,10 @@ export default function App() {
     console.log('Navigate to:', screen);
   };
 
-  // Handle back from settings
+  // Handle back to home from any screen
   const handleBackToHome = () => {
     setCurrentScreen('home');
+    setSelectedMood(null); // Clear selected mood when going back
   };
 
   // Handle logout
@@ -69,13 +74,15 @@ export default function App() {
     setIsAuthenticated(false);
     setUserData(null);
     setCurrentScreen('home');
+    setSelectedMood(null);
     console.log('User logged out');
   };
 
   // Handle mood recommendation
   const handleGetRecommendation = (mood) => {
     console.log('Get recommendation for mood:', mood);
-    // TODO: Navigate to recommendation screen or show modal
+    setSelectedMood(mood);
+    setCurrentScreen('recommendation');
   };
 
   if (showSplash) {
@@ -127,25 +134,25 @@ export default function App() {
         />
       );
     
-    case 'favorites':
-      // TODO: Create FavoritesScreen
-      console.log('Favorites screen not implemented yet');
+    case 'recommendation':
       return (
-        <HomeScreen 
-          userName={userData?.username || 'User'}
-          onGetRecommendation={handleGetRecommendation}
-          onNavigate={handleNavigate}
+        <RecommendationScreen
+          mood={selectedMood}
+          onBack={handleBackToHome}
+        />
+      );
+    
+    case 'favorites':
+      return (
+        <FavoritesScreen 
+          onBack={handleBackToHome}
         />
       );
     
     case 'history':
-      // TODO: Create HistoryScreen
-      console.log('History screen not implemented yet');
       return (
-        <HomeScreen 
-          userName={userData?.username || 'User'}
-          onGetRecommendation={handleGetRecommendation}
-          onNavigate={handleNavigate}
+        <HistoryScreen 
+          onBack={handleBackToHome}
         />
       );
     

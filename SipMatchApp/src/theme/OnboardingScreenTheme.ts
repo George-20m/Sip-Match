@@ -7,10 +7,12 @@ export default StyleSheet.create({
     justifyContent: 'center',
     padding: 30,
   },
-  skipButton: {
+    skipButton: {
     position: 'absolute',
     top: 60,
     right: 25,
+    zIndex: 10,
+    padding: 10,
   },
   skipText: {
     color: '#6B4E2E',

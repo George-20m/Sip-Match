@@ -78,7 +78,13 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
   return (
     <LinearGradient colors={slides[current].colors} style={styles.container}>
       {/* Skip Button */}
-      <TouchableOpacity style={styles.skipButton} onPress={onComplete}>
+      <TouchableOpacity 
+        style={styles.skipButton} 
+        onPress={onComplete}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        delayPressIn={0}
+        activeOpacity={0.7}
+      >
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
 

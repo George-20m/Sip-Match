@@ -1,5 +1,5 @@
 // api/api.js
-const API_URL = 'http://'+ process.env.API_IPv4_ADDRESS +'/api/auth';
+const API_URL = `http://${process.env.EXPO_PUBLIC_API_IPV4_ADDRESS}/api/auth`;
 
 // Send verification code (Step 1 of signup)
 export const sendVerificationCode = async (username, email, password) => {

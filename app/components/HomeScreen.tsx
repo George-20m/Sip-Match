@@ -1,4 +1,4 @@
-// app/components/HomeScreen.tsx
+// Main signed-in screen that gathers context and requests drink recommendations.
 import { useUser } from '@clerk/clerk-expo';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,7 +31,7 @@ import * as Location from 'expo-location';
 
 const { width } = Dimensions.get('window');
 const ONBOARDING_KEY = '@sip_match_onboarding_complete';
-const ML_API_URL = 'http://192.168.1.3:3000'; // Your ngrok URL // Replace with your actual ML API URL
+const ML_API_URL = process.env.EXPO_PUBLIC_ML_API_URL || 'http://192.168.110.63:3000';
 
 interface Mood {
   id: string;
@@ -354,7 +354,7 @@ export default function HomeScreen({ onNavigateToSettings }: HomeScreenProps) {
         'Unable to connect to recommendation service. Please make sure:\n\n' +
         '1. The ML server is running on your computer\n' +
         '2. Your phone and computer are on the same WiFi network\n' +
-        '3. The IP address (192.168.1.3) is correct',
+        `3. The ML API URL is correct: ${ML_API_URL}`,
         [{ text: 'OK' }]
       );
     } finally {

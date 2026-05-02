@@ -1,4 +1,4 @@
-// app/components/HistoryScreen.tsx
+// Screen that groups prior recommendation sessions and lets the user revisit them.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import React, { useState } from 'react';

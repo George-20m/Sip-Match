@@ -1,50 +1,130 @@
-# Welcome to your Expo app 👋
+# SipMatch
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+SipMatch is an Expo React Native app backed by Convex, Clerk authentication, and a local Python ML recommendation API.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node.js 18+
+- npm
+- Python 3.10+
+- Expo Go or an Android/iOS simulator
 
-   ```bash
-   npm install
-   ```
+## Environment Files
 
-2. Start the app
+The app expects these files in the project root:
 
-   ```bash
-   npx expo start
-   ```
+### `.env.local`
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```env
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+EXPO_PUBLIC_ML_API_URL=http://your_local_ip:3000
+EXPO_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id
+EXPO_PUBLIC_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+EXPO_PUBLIC_SPOTIFY_REDIRECT_URI=sipmatch://spotify-callback
+CONVEX_DEPLOYMENT=your_convex_deployment
+EXPO_PUBLIC_CONVEX_URL=your_convex_url
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+If you use Clerk with Convex, also make sure `CLERK_ISSUER_URL` is available for Convex when running `npx convex dev`.
 
-## Learn more
+## Install Dependencies
 
-To learn more about developing your project with Expo, look at the following resources:
+Install the app dependencies:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm install
+```
 
-## Join the community
+Install the ML API dependencies:
 
-Join our community of developers creating universal apps.
+```bash
+cd drink-recommendation-ml
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+cd ..
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Run the App
+
+You need 3 running services during development.
+
+### 1. Start Convex
+
+From the project root:
+
+```bash
+npx convex dev
+```
+
+### 2. Start the Python ML API
+
+From `drink-recommendation-ml`:
+
+```bash
+cd drink-recommendation-ml
+.venv\Scripts\activate
+python app.py
+```
+
+By default the ML API starts on:
+
+```text
+http://192.168.110.63:3000
+```
+
+If your machine IP is different, update the hardcoded ML API URL in:
+
+- `app/services/mlService.ts`
+- `app/components/HomeScreen.tsx`
+- `drink-recommendation-ml/test_api.py`
+
+Or run the API with matching environment variables:
+
+```bash
+$env:FLASK_HOST="0.0.0.0"
+$env:FLASK_PORT="3000"
+python app.py
+```
+
+### 3. Start Expo
+
+From the project root:
+
+```bash
+npm start
+```
+
+## Platform Commands
+
+Run Expo directly for a target platform:
+
+```bash
+npm run android
+npm run ios
+npm run web
+```
+
+## Useful Commands
+
+Lint the project:
+
+```bash
+npm run lint
+```
+
+Retrain the ML model manually:
+
+```bash
+cd drink-recommendation-ml
+.venv\Scripts\activate
+python model/train_model.py
+```
+
+## Recommended Development Order
+
+Open 3 terminals:
+
+1. `npx convex dev`
+2. `cd drink-recommendation-ml && .venv\Scripts\activate && python app.py`
+3. `npm start`

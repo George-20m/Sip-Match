@@ -1,4 +1,4 @@
-// convex/favorites.ts
+// Favorite-related queries and mutations backed by recommendation interaction records.
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 

@@ -1,4 +1,4 @@
-// app/index.tsx
+// Entry route that decides between splash, onboarding, auth, and the signed-in home flow.
 import { useAuth } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -6,32 +6,35 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import SplashScreen from './components/SplashScreen';
 
+// Shared storage key that remembers whether onboarding has already been completed.
 const ONBOARDING_KEY = '@sip_match_onboarding_complete';
 
 export default function Index() {
+  // Track auth state, navigation, splash visibility, and onboarding progress.
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // Debug logging
+  // Log entry-state changes while debugging the startup flow.
   useEffect(() => {
     console.log('Index - Auth State:', { isLoaded, isSignedIn, hasSeenOnboarding, showSplash });
   }, [isLoaded, isSignedIn, hasSeenOnboarding, showSplash]);
 
-  // Check if user has seen onboarding
+  // Load the persisted onboarding flag on first mount.
   useEffect(() => {
     checkOnboardingStatus();
   }, []);
 
-  // Navigate when everything is loaded
+  // Route the user only after splash, auth, and onboarding state are all ready.
   useEffect(() => {
     if (!showSplash && isLoaded && hasSeenOnboarding !== null && !isNavigating) {
       navigateToCorrectScreen();
     }
   }, [showSplash, isLoaded, hasSeenOnboarding, isSignedIn]);
 
+  // Read onboarding completion from storage and normalize it into local UI state.
   const checkOnboardingStatus = async () => {
     try {
       const value = await AsyncStorage.getItem(ONBOARDING_KEY);
@@ -43,6 +46,7 @@ export default function Index() {
     }
   };
 
+  // Send signed-in users home, returning users to auth, and new users to onboarding.
   const navigateToCorrectScreen = async () => {
     if (isNavigating) return; // Prevent multiple navigations
     
@@ -63,22 +67,23 @@ export default function Index() {
       }
     } catch (error) {
       console.error('Navigation error:', error);
-      // Fallback to onboarding if something goes wrong
+      // Fall back to onboarding if route resolution fails unexpectedly.
       router.replace('/onboarding');
     }
   };
 
+  // Hide the splash screen once its minimum display time finishes.
   const handleSplashFinish = () => {
     console.log('✅ Splash finished');
     setShowSplash(false);
   };
 
-  // Show splash screen first
+  // Show the branded splash screen before making any route decision.
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} minimumDisplayTime={2000} />;
   }
 
-  // Show loading while checking auth and onboarding status
+  // Show a loading state while auth and onboarding checks are still resolving.
   if (!isLoaded || hasSeenOnboarding === null) {
     return (
       <View style={styles.loadingContainer}>
@@ -88,7 +93,7 @@ export default function Index() {
     );
   }
 
-  // This should never show as navigation happens in useEffect
+  // Fallback loading UI while the navigation effect redirects the user.
   return (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color="#8D6E63" />

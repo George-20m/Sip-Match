@@ -1,4 +1,4 @@
-// convex/recommendations.ts
+// Queries and mutations for saving recommendation sessions, ratings, and history.
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 

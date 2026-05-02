@@ -1,4 +1,4 @@
-// app/components/FavoritesScreen.tsx
+// Screen that shows the current user's saved favorite drinks.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import React from 'react';

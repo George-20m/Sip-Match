@@ -1,4 +1,4 @@
-// app/components/RecommendationsScreen.tsx
+// Results screen that renders ranked ML drink matches and contextual explanation.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import React from 'react';

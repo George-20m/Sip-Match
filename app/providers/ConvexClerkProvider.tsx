@@ -1,4 +1,4 @@
-// app/providers/ConvexClerkProvider.tsx
+// Shared provider that connects Clerk authentication state to the Convex client.
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";

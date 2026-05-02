@@ -1,3 +1,4 @@
+// Modal picker for searching, previewing, and selecting Spotify tracks by mood.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import React, { useEffect, useState } from 'react';

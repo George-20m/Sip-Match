@@ -1,4 +1,4 @@
-// app/components/OnboardingScreen.tsx
+// Introductory slides that explain the app before the first sign-in.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import {

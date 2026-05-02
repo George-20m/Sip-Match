@@ -1,4 +1,4 @@
-// app/components/AuthScreen.tsx
+// Authentication UI for sign-in, sign-up, and OAuth-based account creation.
 import { useOAuth, useSignIn, useSignUp, useUser } from '@clerk/clerk-expo';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation } from 'convex/react';

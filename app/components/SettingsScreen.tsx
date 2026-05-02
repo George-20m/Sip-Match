@@ -1,4 +1,4 @@
-// app/components/SettingsScreen.tsx
+// Profile and account settings screen for editing user details and signing out.
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';

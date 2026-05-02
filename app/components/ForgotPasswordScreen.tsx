@@ -1,4 +1,4 @@
-// app/components/ForgotPasswordScreen.tsx
+// Password reset UI for requesting and confirming a Clerk reset flow.
 import { useSignIn } from '@clerk/clerk-expo';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

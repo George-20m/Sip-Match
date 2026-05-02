@@ -1,7 +1,7 @@
-// app/services/mlService.ts
+// Client-side wrapper around the local Flask ML recommendation API.
 import axios from 'axios';
 
-const ML_API_URL = 'http://192.168.1.3:3000';
+const ML_API_URL = process.env.EXPO_PUBLIC_ML_API_URL || 'http://192.168.110.63:3000';
 
 export interface MLRecommendationRequest {
   user_id: string;

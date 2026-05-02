@@ -1,4 +1,4 @@
-// convex/schema.ts
+// Central Convex schema for users, drinks, and recommendation interactions.
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 

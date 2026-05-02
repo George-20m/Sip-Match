@@ -1,4 +1,5 @@
 // convex/users.ts
+// User queries and mutations for syncing Clerk profile data into Convex.
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 

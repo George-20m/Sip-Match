@@ -1,4 +1,4 @@
-// convex/auth.config.ts
+// Convex auth provider configuration for Clerk-issued tokens.
 export default {
   providers: [
     {

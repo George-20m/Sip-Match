@@ -1,3 +1,4 @@
+// Minimal Spotify client for token management, search, and mood-based track lookup.
 import axios from 'axios';
 
 const SPOTIFY_CLIENT_ID = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID || '';

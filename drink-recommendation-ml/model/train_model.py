@@ -1,3 +1,4 @@
+"""Training pipeline that fetches drinks from Convex and persists local model artifacts."""
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier

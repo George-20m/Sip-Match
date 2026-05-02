@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""
-Test script for the Drink Recommendation ML API
-"""
+"""Manual smoke-test script for the local Flask recommendation API."""
 import requests
 import json
 from datetime import datetime
 
 # API base URL
-BASE_URL = "http://192.168.1.3:3000"
+BASE_URL = "http://192.168.110.63:3000"
 
 def test_health_check():
     """Test the health check endpoint"""

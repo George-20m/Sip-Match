@@ -1,4 +1,4 @@
-// app/components/SplashScreen.tsx
+// Launch splash screen with simple entrance animation before route resolution.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import {

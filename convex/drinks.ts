@@ -1,4 +1,5 @@
 // convex/drinks.ts
+// Query helpers for reading and filtering the drink catalog from Convex.
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 

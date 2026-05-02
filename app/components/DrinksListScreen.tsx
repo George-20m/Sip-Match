@@ -1,4 +1,4 @@
-// app/components/DrinksListScreen.tsx
+// Catalog screen that lists drinks and lets the user browse and favorite them.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
 import React, { useState } from 'react';

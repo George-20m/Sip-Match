@@ -1,4 +1,4 @@
-// convex/seedDrinks.ts
+// Seed mutation for loading the initial drink catalog into Convex.
 import { mutation } from "./_generated/server";
 
 export const seedAllDrinks = mutation({

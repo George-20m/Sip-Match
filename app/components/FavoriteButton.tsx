@@ -1,4 +1,4 @@
-// app/components/FavoriteButton.tsx
+// Reusable heart button that toggles a drink's favorite state through Convex.
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import React from 'react';

@@ -1,24 +1,28 @@
-// app/onboarding.tsx
+// Onboarding route that persists completion state before sending the user to auth.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert } from 'react-native';
 import OnboardingScreen from './components/OnboardingScreen';
 
+// Shared storage key that marks onboarding as completed.
 const ONBOARDING_KEY = '@sip_match_onboarding_complete';
 
 export default function Onboarding() {
+  // Router is only used to continue into auth after onboarding finishes.
   const router = useRouter();
 
+  // Persist completion locally, then move the user into the authentication flow.
   const handleComplete = async () => {
     try {
-      // Mark onboarding as complete
+      // Save a local flag so onboarding does not appear again on the next launch.
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
       
-      // Navigate to auth screen
+      // Continue into sign-in / sign-up once onboarding is complete.
       router.replace('/auth');
     } catch (error) {
       console.error('Error saving onboarding status:', error);
+      // Offer recovery options if local persistence fails.
       Alert.alert(
         'Error',
         'Failed to save your progress. Please try again.',
@@ -37,5 +41,6 @@ export default function Onboarding() {
     }
   };
 
+  // Render the onboarding slides and pass down the completion handler.
   return <OnboardingScreen onComplete={handleComplete} />;
 }

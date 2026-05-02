@@ -1,4 +1,4 @@
-// app/auth.tsx
+// Public route wrapper for the authentication screen.
 import { useAuth } from '@clerk/clerk-expo';
 import { Redirect } from 'expo-router';
 import React from 'react';
@@ -6,9 +6,10 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import AuthScreen from './components/AuthScreen';
 
 export default function Auth() {
+  // Read Clerk auth state to decide whether this public route should remain visible.
   const { isSignedIn, isLoaded } = useAuth();
 
-  // Show loading while checking auth status
+  // Wait for Clerk to restore any existing session before rendering auth UI.
   if (!isLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -17,12 +18,12 @@ export default function Auth() {
     );
   }
 
-  // If user is already signed in, redirect to home
+  // Redirect authenticated users away from the auth screen.
   if (isSignedIn) {
     return <Redirect href="/home" />;
   }
 
-  // Show auth screen
+  // Render the sign-in and sign-up experience for guests.
   return <AuthScreen />;
 }
 

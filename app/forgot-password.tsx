@@ -1,4 +1,4 @@
-// app/forgot-password.tsx
+// Public route wrapper for the password reset screen.
 import { useAuth } from '@clerk/clerk-expo';
 import { Redirect } from 'expo-router';
 import React from 'react';
@@ -6,9 +6,10 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 
 export default function ForgotPassword() {
+  // Read auth state so signed-in users do not enter the password reset flow.
   const { isSignedIn, isLoaded } = useAuth();
 
-  // Show loading while checking auth status
+  // Wait for Clerk auth to load before deciding what this route should show.
   if (!isLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -17,12 +18,12 @@ export default function ForgotPassword() {
     );
   }
 
-  // If user is already signed in, redirect to home
+  // Redirect authenticated users back to the home route.
   if (isSignedIn) {
     return <Redirect href="/home" />;
   }
 
-  // Show forgot password screen
+  // Render the password recovery experience for guests.
   return <ForgotPasswordScreen />;
 }
 

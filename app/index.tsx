@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Entry route that decides between splash, onboarding, auth, and the signed-in home flow.
 import { useAuth } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -79,40 +80,84 @@ export default function Index() {
   };
 
   // Show the branded splash screen before making any route decision.
+=======
+import React, { useMemo } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import SplashScreen from '@/src/components/SplashScreen';
+import { useIndexLogic } from '@/src/hooks/useIndexLogic';
+import { ThemeColors } from '@/src/theme/colors';
+
+export default function Index() {
+  const {
+    isLoaded,
+    theme,
+    showSplash,
+    hasSeenOnboarding,
+    handleSplashFinish,
+  } = useIndexLogic();
+
+  const styles = useMemo(() => getStyles(theme), [theme]);
+
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} minimumDisplayTime={2000} />;
   }
 
+<<<<<<< HEAD
   // Show a loading state while auth and onboarding checks are still resolving.
   if (!isLoaded || hasSeenOnboarding === null) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#8D6E63" />
+=======
+  if (!isLoaded || hasSeenOnboarding === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.secondary} />
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
+<<<<<<< HEAD
   // Fallback loading UI while the navigation effect redirects the user.
   return (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color="#8D6E63" />
+=======
+  return (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={theme.secondary} />
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
       <Text style={styles.loadingText}>Redirecting...</Text>
     </View>
   );
 }
 
+<<<<<<< HEAD
 const styles = StyleSheet.create({
+=======
+const getStyles = (theme: ThemeColors) => StyleSheet.create({
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+<<<<<<< HEAD
     backgroundColor: '#FFFAF0',
+=======
+    backgroundColor: theme.background,
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+<<<<<<< HEAD
     color: '#8D6E63',
+=======
+    color: theme.secondary,
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
     fontWeight: '500',
   },
 });

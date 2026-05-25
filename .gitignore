@@ -43,3 +43,12 @@ app-example
 # generated native folders
 /ios
 /android
+<<<<<<< HEAD
+=======
+
+Notes.md
+
+__pycache__/
+*.pyc
+*.log
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09

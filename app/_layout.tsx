@@ -4,6 +4,11 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+<<<<<<< HEAD
+=======
+import { ThemeProvider } from "@/src/theme/ThemeContext";
+import { Logger } from "@/src/utils/logger";
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 
 // Create one shared Convex client for the full app lifecycle.
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
@@ -16,7 +21,11 @@ const tokenCache = {
     try {
       return await SecureStore.getItemAsync(key);
     } catch (err) {
+<<<<<<< HEAD
       console.error("SecureStore get error:", err);
+=======
+      Logger.error("Failed to retrieve token from SecureStore", "tokenCache.getToken", err);
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
       return null;
     }
   },
@@ -24,7 +33,11 @@ const tokenCache = {
     try {
       await SecureStore.setItemAsync(key, value);
     } catch (err) {
+<<<<<<< HEAD
       console.error("SecureStore save error:", err);
+=======
+      Logger.error("Failed to save token to SecureStore", "tokenCache.saveToken", err);
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
     }
   },
 };
@@ -45,6 +58,7 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       {/* Attach Convex requests to the current Clerk auth session. */}
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+<<<<<<< HEAD
         {/* Register the top-level routes and hide native headers. */}
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
@@ -52,6 +66,17 @@ export default function RootLayout() {
           <Stack.Screen name="forgot-password" />  {/* ADD THIS LINE */}
           <Stack.Screen name="home" />
         </Stack>
+=======
+        <ThemeProvider>
+          {/* Register the top-level routes and hide native headers. */}
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="auth" />
+            <Stack.Screen name="forgot-password" />
+            <Stack.Screen name="home" />
+          </Stack>
+        </ThemeProvider>
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );

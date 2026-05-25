@@ -5,6 +5,22 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+<<<<<<< HEAD
+=======
+from collections import Counter
+
+# ANSI color codes for terminal output
+COLORS = {
+    'HEADER': '\033[95m',
+    'BLUE': '\033[94m',      # Info
+    'GREEN': '\033[92m',     # Success
+    'YELLOW': '\033[93m',    # Warning
+    'RED': '\033[91m',       # Error
+    'ENDC': '\033[0m',       # Reset
+    'BOLD': '\033[1m',
+    'UNDERLINE': '\033[4m'
+}
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 
 
 class DrinkPredictor:
@@ -22,7 +38,11 @@ class DrinkPredictor:
         self.label_encoder = joblib.load(model_dir / 'label_encoder.pkl')
         self.drinks_df = pd.read_pickle(model_dir / 'drinks_df.pkl')
 
+<<<<<<< HEAD
         print(f"Model loaded successfully with {len(self.drinks_df)} drinks")
+=======
+        print(f"{COLORS['GREEN']}Model loaded successfully with {len(self.drinks_df)} drinks{COLORS['ENDC']}")
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 
     def map_weather_condition(self, condition, temperature):
         """Map weather condition to drink-friendly format."""
@@ -54,7 +74,117 @@ class DrinkPredictor:
         except Exception:
             return "afternoon"
 
+<<<<<<< HEAD
     def predict(self, user_data):
+=======
+    def build_user_taste_profile(self, favorite_drinks):
+        if not favorite_drinks:
+            return None   # No profile for cold-start users
+
+        # Temperature preference: find the most common temperature value
+        # among favorite drinks. Ignore drinks with temperature == "any".
+        temps = [d.get('temperature') for d in favorite_drinks
+                 if d.get('temperature') and d.get('temperature') != 'any']
+        preferred_temp = max(set(temps), key=temps.count) if temps else None
+
+        # Sweetness preference: average sweetnessLevel (0-10 number)
+        sweetness_vals = [d.get('sweetnessLevel', 5) for d in favorite_drinks
+                          if d.get('sweetnessLevel') is not None]
+        avg_sweetness = sum(sweetness_vals) / len(sweetness_vals) if sweetness_vals else 5.0
+
+        # Intensity preference: average intensity (1-5 number)
+        intensity_vals = [d.get('intensity', 3) for d in favorite_drinks
+                          if d.get('intensity') is not None]
+        avg_intensity = sum(intensity_vals) / len(intensity_vals) if intensity_vals else 3.0
+
+        # Caffeine preference: most common caffeineLevel string
+        caffeine_vals = [d.get('caffeineLevel', 'none') for d in favorite_drinks
+                         if d.get('caffeineLevel')]
+        preferred_caffeine = max(set(caffeine_vals), key=caffeine_vals.count) if caffeine_vals else None
+
+        # Flavor tags: collect all flavorProfile strings from all favorites,
+        # count occurrences, keep only those appearing 2+ times as "strong" tags,
+        # keep all as "all" tags
+        all_flavor_tags = []
+        for d in favorite_drinks:
+            all_flavor_tags.extend(d.get('flavorProfile', []))
+        flavor_counts = Counter(all_flavor_tags)
+        strong_flavor_tags = {tag for tag, count in flavor_counts.items() if count >= 2}
+
+        return {
+            'preferred_temp': preferred_temp,
+            'avg_sweetness': avg_sweetness,
+            'avg_intensity': avg_intensity,
+            'preferred_caffeine': preferred_caffeine,
+            'strong_flavor_tags': strong_flavor_tags,
+            'all_flavor_tags': set(all_flavor_tags),
+            'has_profile': True,
+            'favorites_count': len(favorite_drinks)
+        }
+
+    def compute_taste_match_score(self, drink, profile):
+        if not profile:
+            return 0   # Cold-start: no bonus, no penalty
+
+        bonus = 0
+
+        # Temperature match:
+        # If the user has a preferred_temp and this drink matches it → +30
+        # If the user has a preferred_temp and this drink is "any" → +10
+        # If the user has a preferred_temp and this drink does NOT match → -20
+        # (This replaces the hard-coded hot/cold weather filter)
+        drink_temp = drink.get('temperature', 'any')
+        pref_temp = profile.get('preferred_temp')
+        if pref_temp:
+            if drink_temp == pref_temp:
+                bonus += 30
+            elif drink_temp == 'any':
+                bonus += 10
+            else:
+                bonus -= 20
+
+        # Sweetness match:
+        # Compare drink's sweetnessLevel to user's avg_sweetness
+        # If within 2 points difference → +15
+        # If within 4 points difference → +8
+        # If more than 4 points different → 0 (no penalty, just no bonus)
+        drink_sweetness = drink.get('sweetnessLevel', 5)
+        diff = abs(drink_sweetness - profile['avg_sweetness'])
+        if diff <= 2:
+            bonus += 15
+        elif diff <= 4:
+            bonus += 8
+
+        # Intensity match:
+        # Compare drink's intensity to user's avg_intensity
+        # If within 1 → +10
+        # If within 2 → +5
+        drink_intensity = drink.get('intensity', 3)
+        diff_i = abs(drink_intensity - profile['avg_intensity'])
+        if diff_i <= 1:
+            bonus += 10
+        elif diff_i <= 2:
+            bonus += 5
+
+        # Caffeine match:
+        # If drink's caffeineLevel matches user's preferred_caffeine → +15
+        pref_caff = profile.get('preferred_caffeine')
+        if pref_caff and drink.get('caffeineLevel') == pref_caff:
+            bonus += 15
+
+        # Flavor profile match:
+        # If drink shares any tag with user's strong_flavor_tags → +12 per matching tag (max +24)
+        # If drink shares any tag with user's all_flavor_tags → +5 per matching tag (max +10)
+        drink_flavors = set(drink.get('flavorProfile', []))
+        strong_matches = drink_flavors & profile.get('strong_flavor_tags', set())
+        all_matches = drink_flavors & profile.get('all_flavor_tags', set())
+        bonus += min(len(strong_matches) * 12, 24)
+        bonus += min(len(all_matches) * 5, 10)
+
+        return bonus
+
+    def predict(self, user_data, user_favorites=None):
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
         """Predict drink recommendations based on user data."""
         try:
             mood = user_data.get('mood', 'Happy')
@@ -66,17 +196,30 @@ class DrinkPredictor:
             weather = self.map_weather_condition(weather_condition, weather_temp)
             time_of_day = self.get_time_of_day(timestamp)
 
+<<<<<<< HEAD
             preferred_temp = 'cold' if weather in ['hot', 'warm'] else 'hot'
 
             filtered_drinks = self.drinks_df[
                 (self.drinks_df['temperature'] == preferred_temp)
                 | (self.drinks_df['temperature'] == 'frozen')
             ].copy()
+=======
+            # Build the user taste profile
+            profile = self.build_user_taste_profile(user_favorites or [])
+
+            # Use ALL drinks (no hard-coded temperature filter)
+            all_drinks = self.drinks_df.copy()
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 
             energy_boost = 'energetic' in mood.lower() or (song is not None)
             recommendations = []
 
+<<<<<<< HEAD
             for _, drink in filtered_drinks.iterrows():
+=======
+            count = 0
+            for _, drink in all_drinks.iterrows():
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
                 score = 0
 
                 best_moods = drink.get('bestForMoods', [])
@@ -101,12 +244,22 @@ class DrinkPredictor:
                 elif not energy_boost and caffeine in ['low', 'none']:
                     score += 10
 
+<<<<<<< HEAD
                 if drink['temperature'] == preferred_temp:
                     score += 10
+=======
+                # Context score for temperature match (removed hard-coded filter, but we keep a small bonus for matching preferred_temp if profile exists)
+                # Note: The original code had a bonus for matching preferred_temp (line 116 in old code) but we removed the filter.
+                # We'll keep a small bonus for temperature match via the taste match score? Actually, the taste match score already handles temperature.
+                # We do not add any temperature-based score here; it's entirely in the taste match score.
+                # However, the original context scoring did not include temperature match beyond the filter.
+                # We will not add any temperature-based score in the context score.
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 
                 if song and drink.get('intensity', 0) >= 3:
                     score += 10
 
+<<<<<<< HEAD
                 recommendations.append({
                     'drink': drink.to_dict(),
                     'score': score,
@@ -114,6 +267,38 @@ class DrinkPredictor:
                 })
 
             recommendations.sort(key=lambda x: x['score'], reverse=True)
+=======
+                # Add taste match bonus
+                taste_bonus = self.compute_taste_match_score(drink.to_dict(), profile)
+                score += taste_bonus
+
+                # Generate reasons
+                reasons = self._generate_reasons(drink, mood, weather, time_of_day, song)
+                # Add personalized reason if profile exists and taste_bonus is significant
+                if profile is not None and taste_bonus >= 20:
+                    reasons.append("Matches your taste preferences")
+                # Limit to top 3 reasons
+                reasons = reasons[:3]
+
+                if count < 5:
+                    print(f"Drink {drink.get('name')}: score={score}")
+                    count += 1
+
+                recommendations.append({
+                    'drink': drink.to_dict(),
+                    'score': score,
+                    'reasons': reasons,
+                })
+
+            recommendations.sort(
+                key=lambda x: (
+                    x['score'],
+                    x['drink'].get('intensity', 0),       # higher intensity breaks ties first
+                    -x['drink'].get('sweetnessLevel', 5),  # prefer less sweet as second tiebreaker
+                ),
+                reverse=True
+            )
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
             top_recommendations = recommendations[:5]
 
             return {
@@ -140,6 +325,10 @@ class DrinkPredictor:
                     'temperature': weather_temp,
                     'time_of_day': time_of_day,
                     'has_song': song is not None,
+<<<<<<< HEAD
+=======
+                    'personalized': profile is not None,
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
                 },
             }
 
@@ -171,4 +360,8 @@ class DrinkPredictor:
         if flavors:
             reasons.append(f"Features {', '.join(flavors[:2])} notes")
 
+<<<<<<< HEAD
         return reasons[:3]
+=======
+        return reasons[:3]
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09

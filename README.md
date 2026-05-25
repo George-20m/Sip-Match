@@ -16,6 +16,7 @@ The app expects these files in the project root:
 ### `.env.local`
 
 ```env
+<<<<<<< HEAD
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 EXPO_PUBLIC_ML_API_URL=http://your_local_ip:3000
 EXPO_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id
@@ -23,6 +24,17 @@ EXPO_PUBLIC_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 EXPO_PUBLIC_SPOTIFY_REDIRECT_URI=sipmatch://spotify-callback
 CONVEX_DEPLOYMENT=your_convex_deployment
 EXPO_PUBLIC_CONVEX_URL=your_convex_url
+=======
+CONVEX_DEPLOYMENT=your_convex_deployment                        # From Convex Dashboard → Settings → URL & Deploy Key
+EXPO_PUBLIC_CONVEX_URL=your_convex_url                          # From Convex Dashboard → Settings → URL & Deploy Key
+EXPO_PUBLIC_CONVEX_SITE_URL=your_convex_site_url                # Same as EXPO_PUBLIC_CONVEX_URL but ends in .site
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key    # From Clerk Dashboard → Configure → API Keys
+CLERK_ISSUER_URL=your_clerk_issuer_url                          # From Clerk Dashboard → Configure → Domains (e.g. https://xxx.clerk.accounts.dev)
+EXPO_PUBLIC_ML_API_URL=http://your_local_ip:3000                # Your local ML API server IP
+EXPO_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id           # From Spotify Developer Dashboard
+EXPO_PUBLIC_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret   # From Spotify Developer Dashboard
+EXPO_PUBLIC_SPOTIFY_REDIRECT_URI=sipmatch://spotify-callback    # Spotify OAuth redirect URI
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 ```
 
 If you use Clerk with Convex, also make sure `CLERK_ISSUER_URL` is available for Convex when running `npx convex dev`.
@@ -59,6 +71,11 @@ npx convex dev
 
 ### 2. Start the Python ML API
 
+<<<<<<< HEAD
+=======
+> See the [ML service README](drink-recommendation-ml/README.md) for full API docs, personalization details, and training instructions.
+
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
 From `drink-recommendation-ml`:
 
 ```bash
@@ -128,3 +145,9 @@ Open 3 terminals:
 1. `npx convex dev`
 2. `cd drink-recommendation-ml && .venv\Scripts\activate && python app.py`
 3. `npm start`
+<<<<<<< HEAD
+=======
+
+---
+*sip your mood, match your moment.*
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09

@@ -38,7 +38,11 @@ export type Doc<TableName extends TableNames> = DocumentByName<
  * Convex documents are uniquely identified by their `Id`, which is accessible
  * on the `_id` field. To learn more, see [Document IDs](https://docs.convex.dev/using/document-ids).
  *
+<<<<<<< HEAD
  * Documents can be loaded using `db.get(id)` in query and mutation functions.
+=======
+ * Documents can be loaded using `db.get(tableName, id)` in query and mutation functions.
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
  *
  * IDs are just strings at runtime, but this type can be used to distinguish them from other
  * strings when type checking.

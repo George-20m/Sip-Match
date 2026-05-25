@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Protected route wrapper for the main home experience.
 import { useAuth } from '@clerk/clerk-expo';
 import { Redirect, useRouter } from 'expo-router';
@@ -27,6 +28,22 @@ export default function Home() {
   }, [isLoaded, isSignedIn]);
 
   // Show a loading screen until Clerk auth resolves or the timeout guard fires.
+=======
+import { Redirect } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import HomeScreen from '@/src/components/HomeScreen';
+import { useHomePageLogic } from '@/src/hooks/useHomePageLogic';
+
+export default function Home() {
+  const {
+    isSignedIn,
+    isLoaded,
+    forceRender,
+    handleNavigateToSettings,
+  } = useHomePageLogic();
+
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
   if (!isLoaded && !forceRender) {
     return (
       <View style={styles.loadingContainer}>
@@ -36,6 +53,7 @@ export default function Home() {
     );
   }
 
+<<<<<<< HEAD
   // Redirect guests away from the protected home route.
   if (!isSignedIn && isLoaded) {
     console.log('Home.tsx - User NOT signed in, redirecting to auth');
@@ -48,6 +66,12 @@ export default function Home() {
   };
 
   // Render the main signed-in home screen.
+=======
+  if (!isSignedIn && isLoaded) {
+    return <Redirect href="/auth" />;
+  }
+
+>>>>>>> a42ee00cba98587dbf889ac8f43e7e38e3232f09
   return <HomeScreen onNavigateToSettings={handleNavigateToSettings} />;
 }
 
